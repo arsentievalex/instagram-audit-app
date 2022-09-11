@@ -1,0 +1,4 @@
+streamlit
+instaloader
+requests
+plotly
