@@ -10,7 +10,7 @@ from collections import Counter
 st.set_page_config(
      page_title="Insta Audit App",
      page_icon=":rocket:",
-     layout="wide")
+     layout="centered")
 
 
 def crop_to_circle(im):
@@ -23,10 +23,9 @@ def crop_to_circle(im):
     return im
 
 
-def scrape_inst(username, login, password):
+def scrape_inst(username):
     loader = Instaloader()
-    #loader.login(login, password)
-    loader.load_session_from_file('pawpawart_pl', filename='sessionfile123')
+    loader.load_session_from_file('pawpawart_pl', filename='sessionfile_app')
     target_profile = username
 
     profile = Profile.from_username(loader.context, target_profile)
@@ -73,8 +72,11 @@ def scrape_inst(username, login, password):
         hashtags_list_clean.append(i[0].strip())
 
     # calculate top 15% hashtags
-    most_used_hashtags = round(len(hashtags_list_clean) * 0.15)
-    most_used_hashtags_str = ", ".join(hashtags_list_clean[:most_used_hashtags])
+    if len(hashtags_list_clean) > 0:
+        most_used_hashtags = round(len(hashtags_list_clean) * 0.15)
+        most_used_hashtags_str = ", ".join(hashtags_list_clean[:most_used_hashtags])
+    else:
+        most_used_hashtags_str = 'no hashtags used in the last {} posts'.format(total_num_posts)
 
 
     # sort posts by number of likes and comments
@@ -198,22 +200,18 @@ def scrape_inst(username, login, password):
         with col3:
             st.image(worst3)
 
-    #loader.save_session_to_file(filename='sessionfile123')
+    #loader.save_session_to_file(filename='sessionfile_app')
 
 
 st.title('Welcome to Instagram Audit App!')
-st.subheader("This app lets you analyze basic Instagram metrics such as engagement rate, hashtags and most/least popular posts of any Instagram profile")
+st.header("This app lets you analyze basic Instagram metrics such as engagement rate, average number of likes and comments, most used hashtags and most/least popular posts of any Instagram profile")
+st.subheader("**How to use:**")
+st.write("👇 **Enter username to analyze** \n \n :rocket: **Click Run**")
 
-with st.sidebar:
-    st.write('**Log in to your Instagram profile in order to use the app**')
-    login = st.text_input('Username')
-    password = st.text_input('Password', type='password')
-    st.warning('Note: the app does not store your Instagram credentials, logging in is required by the Instaloader library to scrape the Instagram data.'
-             'For more details, please refer to the source code on GitHub.', icon="⚠")
+st.caption('_click "See Example" below to check out the sample analysis!_')
 
 user_input = st.text_input(' ', placeholder='Enter Instagram username')
 run_button = st.button('Run')
-
 
 # show example profile analysis
 with st.expander("See example"):
@@ -225,7 +223,7 @@ with st.expander("See example"):
     st.write(':chart_with_upwards_trend: Engagement rate: 1.72%')
     st.write(':heart: Average number of likes: 169,835')
     st.write(':writing_hand: Average number of comments: 5,696')
-    st.write(':hash: Most used hashtags: ')
+    st.write(':hash: Most used hashtags: no hashtags used in the last 50 posts')
 
     markdown = '<span>**The engagement rate of zuck is </span><span style = "color:Red;">smaller than benchmark </span>' \
                '<span>for profiles with >1m followers by 0.25%**</span>'
@@ -268,19 +266,22 @@ with st.expander("See example"):
             st.image('https://i.postimg.cc/cLR03q0c/worst3.jpg')
 
 
-
 # run the scrape function
-if run_button and len(login) == 0 or run_button and len(password) == 0:
-    st.warning('Please enter your Instagram credentials to use the app')
+if run_button and len(user_input) == 0:
+    st.warning('Please enter Instagram username!')
 
-elif run_button and len(login) > 0 and len(password) > 0:
+elif run_button:
     st.write(" ")
     with st.spinner("Auditing Instagram profile...:hourglass_flowing_sand: (it may take up to 2-3 mins)"):
         try:
-            scrape_inst(user_input, login, password)
+            scrape_inst(user_input)
         except Exception as e:
             st.error('Oops...something went wrong. Please try again!', icon="🚨")
             st.error('Error message: {}'.format(e))
+
+
+st.info('For more details, please refer to the [Instaloader documentation](https://instaloader.github.io/) or [source code on GitHub](https://github.com/arsentievalex/instagram-audit-app)'
+               '\n \n \n This is an open-source project built for educational purposes only.')
 
 
 
