@@ -14,6 +14,7 @@ st.set_page_config(
 
 
 def crop_to_circle(im):
+    """function to resize an image object and make it circle"""
     bigsize = (im.size[0] * 3, im.size[1] * 3)
     mask = Image.new('L', bigsize, 0)
     ImageDraw.Draw(mask).ellipse((0, 0) + bigsize, fill=255)
@@ -24,10 +25,14 @@ def crop_to_circle(im):
 
 
 def scrape_inst(username):
+    """main function to scrape instagram"""
+
+    # initiate instaloader object and log in
     loader = Instaloader()
     loader.load_session_from_file('pawpawart_pl', filename='sessionfile_app')
     target_profile = username
 
+    # load profile data
     profile = Profile.from_username(loader.context, target_profile)
 
     num_followers = profile.followers
@@ -35,12 +40,14 @@ def scrape_inst(username):
     profile_pic = profile.profile_pic_url
     mediacount = profile.mediacount
 
+    # initiate empty lists and counters
     posts_list = []
     total_num_likes = 0
     total_num_comments = 0
     total_num_posts = 0
     hashtag_list = []
 
+    # get data for the last 50 posts
     for post in profile.get_posts():
         if total_num_posts < 50:
             total_num_likes += post.likes
@@ -49,7 +56,7 @@ def scrape_inst(username):
             hashtag_list.append(post.caption_hashtags)
             total_num_posts += 1
 
-
+    # calculate engagement rate
     engagement = round(float(total_num_likes + total_num_comments) / (num_followers * total_num_posts) * 100, 2)
     avg_comments = round(total_num_comments/total_num_posts)
     avg_likes = round(total_num_likes/total_num_posts)
@@ -119,6 +126,7 @@ def scrape_inst(username):
     best3 = Image.open(BytesIO(response7.content))
     best3 = ImageOps.contain(best3, (200, 200))
 
+    # display the data using streamlit frontend
     st.image(profile_round, width=100)
     st.write('User name: {}'.format(str(user_name)))
     st.write(':man-woman-girl-boy: Number of followers: {:,}'.format(num_followers))
