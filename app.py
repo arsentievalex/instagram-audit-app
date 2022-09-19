@@ -29,7 +29,7 @@ def scrape_inst(username):
 
     # initiate instaloader object and log in
     loader = Instaloader()
-    loader.load_session_from_file('pawpawart_pl', filename='sessionfile_app')
+    loader.load_session_from_file(username, filename) # load a session or use loader.login
     target_profile = username
 
     # load profile data
@@ -207,8 +207,6 @@ def scrape_inst(username):
             st.image(worst2)
         with col3:
             st.image(worst3)
-
-    #loader.save_session_to_file(filename='sessionfile_app')
 
 
 st.title('Welcome to Instagram Audit App!')
